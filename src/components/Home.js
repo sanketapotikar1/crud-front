@@ -20,7 +20,7 @@ const Home = () => {
 
     const getdata = async () => {
 
-        const res = await fetch("/getdata", {
+        const res = await fetch("https://crud-backend-fct5.onrender.com/getdata", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -45,7 +45,7 @@ const Home = () => {
 
     const deleteuser = async (id) => {
 
-        const res2 = await fetch(`/deleteuser/${id}`, {
+        const res2 = await fetch(`https://crud-backend-fct5.onrender.com/deleteuser/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"

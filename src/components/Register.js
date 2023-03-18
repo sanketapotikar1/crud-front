@@ -61,7 +61,7 @@ const Register = () => {
 
     return (
         <div className="container">
-            <NavLink to="/">home</NavLink>
+            {/* <NavLink to="/">home</NavLink> */}
             <form className="mt-4">
                 <div className="row">
                     <div class="mb-3 col-lg-6 col-md-6 col-12">

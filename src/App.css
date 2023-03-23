@@ -26,3 +26,12 @@
 .right_view span{
   font-weight: 400;
 }
+
+.Add-data-form{
+  display : flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-left: 100px;
+  padding : 50px;
+  width :80%;
+}

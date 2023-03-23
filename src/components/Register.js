@@ -1,104 +1,178 @@
-import React, { useContext, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { adddata } from './context/ContextProvider';
+import React, { useContext, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Formik, useFormik } from "formik";
+import * as yup from "yup";
+import { adddata } from "./context/ContextProvider";
+
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 const Register = () => {
+  const { udata, setUdata } = useContext(adddata);
 
-    const { udata, setUdata } = useContext(adddata);
+  const Navigate = useNavigate();
 
-    const history = useNavigate();
+  const addinpdata = async (newdata) => {
+    const res = await fetch("https://crud-backend-fct5.onrender.com/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newdata),
+    });
 
-    const [inpval, setINP] = useState({
+    const data = await res.json();
+    console.log(data);
+
+    if (res.status === 422 || !data) {
+      console.log("error ");
+      alert("error");
+    } else {
+      Navigate("/");
+      setUdata(data);
+      console.log("data added");
+    }
+  };
+
+  const formvalidationSchema = yup.object({
+    name: yup
+      .string()
+      .required("Please enter the your name")
+      .min(3, " Please give bigger name"),
+    email: yup
+      .string()
+      .min(8, "email is too short")
+      .max(25, "too long")
+      .required("Required"),
+    age: yup
+      .number()
+      .required("Please enter your name")
+      .min(18, "Age should be above 18")
+      .max(150, "please enter valid age"),
+    mobile: yup
+      .string()
+      .required("Please enter your mobile number")
+      .min(10, "Please enter 10 digit phone number")
+      .max(10, "Please enter 10 digit phone number"),
+    work: yup
+      .string()
+      .required("Please fill about your work")
+      .min(5, "please enter this info with more details"),
+    add: yup
+      .string()
+      .required("Please enter your address")
+      .min(3, "please enter your address in more detail")
+      .max(50, "please keep your address short"),
+    desc: yup
+      .string()
+      .required("please enter this decription")
+      .min(15, "Please enter this description with more details")
+      .max(250, "Please keep your description short"),
+  });
+
+  const { handleSubmit, values, handleChange, handleBlur, errors, touched } =
+    useFormik({
+      initialValues: {
         name: "",
         email: "",
         age: "",
         mobile: "",
         work: "",
         add: "",
-        desc: ""
-    })
+        desc: "",
+      },
+      validationSchema: formvalidationSchema,
+      onSubmit: (newdata) => {
+        console.log("onSubmit", newdata);
+        addinpdata(newdata);
+      },
+    });
 
-    const setdata = (e) => {
-        const { name, value } = e.target;
-        setINP((preval) => {
-            return {
-                ...preval,
-                [name]: value
-            }
-        })
-    }
+  return (
+    <form onSubmit={handleSubmit} className="Add-data-form">
+      <TextField
+        label="Name"
+        variant="filled"
+        name="name"
+        value={values.name}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        helperText={touched.name && errors.name ? errors.name : ""}
+        error={touched.name && errors.name ? true : false}
+      />
 
+      <TextField
+        label="Email"
+        variant="filled"
+        name="email"
+        value={values.email}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        helperText={touched.email && errors.email ? errors.email : ""}
+        error={touched.email && errors.email ? true : false}
+      />
 
-    const addinpdata = async (e) => {
-        e.preventDefault();
+      <TextField
+        label="Age"
+        variant="filled"
+        name="age"
+        value={values.age}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        helperText={touched.age && errors.age ? errors.age : ""}
+        error={touched.age && errors.age ? true : false}
+      />
 
-        const { name, email, work, add, mobile, desc, age } = inpval;
+      <TextField
+        label="Mobile"
+        variant="filled"
+        name="mobile"
+        value={values.mobile}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        helperText={touched.mobile && errors.mobile ? errors.mobile : ""}
+        error={touched.mobile && errors.mobile ? true : false}
+      />
 
-        const res = await fetch("https://crud-backend-fct5.onrender.com/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name, email, work, add, mobile, desc, age
-            })
-        });
+      <TextField
+        label="Work details"
+        variant="filled"
+        name="work"
+        value={values.work}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        helperText={touched.work && errors.work ? errors.work : ""}
+        error={touched.work && errors.work ? true : false}
+      />
 
-        const data = await res.json();
-        console.log(data);
+      <TextField
+        label="Address"
+        variant="filled"
+        name="add"
+        value={values.add}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        helperText={touched.add && errors.add ? errors.add : ""}
+        error={touched.add && errors.add ? true : false}
+      />
 
-        if (res.status === 422 || !data) {
-            console.log("error ");
-            alert("error");
+      <TextField
+        multiline
+        rows={4}
+        label="Description"
+        variant="filled"
+        name="desc"
+        value={values.desc}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        helperText={touched.desc && errors.desc ? errors.desc : ""}
+        error={touched.desc && errors.desc ? true : false}
+      />
 
-        } else {
-            history("/")
-            setUdata(data)
-            console.log("data added");
-
-        }
-    }
-
-    return (
-        <div className="container">
-            {/* <NavLink to="/">home</NavLink> */}
-            <form className="mt-4">
-                <div className="row">
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputEmail1" class="form-label">Name</label>
-                        <input type="text" value={inpval.name} onChange={setdata} name="name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">email</label>
-                        <input type="email" value={inpval.email} onChange={setdata} name="email" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">age</label>
-                        <input type="text" value={inpval.age} onChange={setdata} name="age" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Mobile</label>
-                        <input type="number" value={inpval.mobile} onChange={setdata} name="mobile" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Work</label>
-                        <input type="text" value={inpval.work} onChange={setdata} name="work" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Address</label>
-                        <input type="text" value={inpval.add} onChange={setdata} name="add" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-12 col-md-12 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Description</label>
-                        <textarea name="desc" value={inpval.desc} onChange={setdata} className="form-control" id="" cols="30" rows="5"></textarea>
-                    </div>
-
-                    <button type="submit"
-                     onClick={addinpdata}
-                      class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
-    )
-}
+      <button type="submit" variant="filled">
+        Submit
+      </button>
+    </form>
+  );
+};
 export default Register;

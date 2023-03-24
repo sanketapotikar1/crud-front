@@ -1,142 +1,229 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { NavLink, useParams,useHistory, useNavigate } from 'react-router-dom'
-import { updatedata } from './context/ContextProvider'
+import React, { useContext, useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { updatedata } from "./context/ContextProvider";
+import { useFormik } from "formik";
+import * as yup from "yup";
 
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 
 const Edit = () => {
+  // const [getuserdata, setUserdata] = useState([]);
+  // console.log(getuserdata);
 
-    // const [getuserdata, setUserdata] = useState([]);
-    // console.log(getuserdata);
+  const { updata, setUPdata } = useContext(updatedata);
 
-   const {updata, setUPdata} = useContext(updatedata)
+  const Navigate = useNavigate("");
 
-    const history = useNavigate("");
+  const { id } = useParams("");
+  console.log(id);
 
-    const [inpval, setINP] = useState({
+  const formvalidationSchema = yup.object({
+    name: yup
+      .string()
+      .required("Please enter the your name")
+      .min(3, " Please give bigger name"),
+    email: yup
+      .string()
+      .min(8, "email is too short")
+      .max(25, "too long")
+      .required("Required"),
+    age: yup
+      .number()
+      .required("Please enter your name")
+      .min(18, "Age should be above 18")
+      .max(150, "please enter valid age"),
+    mobile: yup
+      .string()
+      .required("Please enter your mobile number")
+      .min(10, "Please enter 10 digit phone number")
+      .max(10, "Please enter 10 digit phone number"),
+    work: yup
+      .string()
+      .required("Please fill about your work")
+      .min(5, "please enter this info with more details"),
+    add: yup
+      .string()
+      .required("Please enter your address")
+      .min(3, "please enter your address in more detail")
+      .max(50, "please keep your address short"),
+    desc: yup
+      .string()
+      .required("please enter this decription")
+      .min(15, "Please enter this description with more details")
+      .max(250, "Please keep your description short"),
+  });
+
+  const [inpval, setINP] = useState({
+    name: "",
+    email: "",
+    age: "",
+    mobile: "",
+    work: "",
+    add: "",
+    desc: "",
+  });
+
+  const setdata = (e) => {
+    console.log(e.target.value);
+    const { name, value } = e.target;
+    setINP((preval) => {
+      return {
+        ...preval,
+        [name]: value,
+      };
+    });
+  };
+
+  const getdata = async () => {
+    const res = await fetch(
+      `https://crud-backend-fct5.onrender.com/getuser/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await res.json();
+    console.log(data);
+
+    if (res.status === 422 || !data) {
+      console.log("error ");
+    } else {
+      setINP(data);
+      console.log("data recived");
+    }
+  };
+
+  useEffect(() => {
+    getdata();
+  }, []);
+
+  const updateuser = async (e) => {
+    e.preventDefault();
+
+    const { name, email, work, add, mobile, desc, age } = inpval;
+
+    const res2 = await fetch(
+      `https://crud-backend-fct5.onrender.com/updateuser/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          work,
+          add,
+          mobile,
+          desc,
+          age,
+        }),
+      }
+    );
+
+    const data2 = await res2.json();
+    console.log(data2);
+
+    if (res2.status === 422 || !data2) {
+      alert("fill the data");
+    } else {
+      Navigate("/");
+      setUPdata(data2);
+    }
+  };
+
+  const { handleSubmit, values, handleChange, handleBlur, errors, touched } =
+    useFormik({
+      initialValues: {
         name: "",
         email: "",
         age: "",
         mobile: "",
         work: "",
         add: "",
-        desc: ""
-    })
+        desc: "",
+      },
+      validationSchema: formvalidationSchema,
+      onSubmit: (newdata) => {
+        console.log("onSubmit", newdata);
+        updateuser(newdata);
+      },
+    });
 
-    const setdata = (e) => {
-        console.log(e.target.value);
-        const { name, value } = e.target;
-        setINP((preval) => {
-            return {
-                ...preval,
-                [name]: value
-            }
-        })
-    }
+  return (
+    <form className="Add-data-form">
+      <TextField
+        label="Name"
+        name="name"
+        variant="filled"
+        value={inpval.name}
+        onChange={setdata}
+      />
 
+      <TextField
+        label="Email"
+        name="email"
+        variant="filled"
+        value={inpval.email}
+        onChange={setdata}
+      />
 
-    const { id } = useParams("");
-    console.log(id);
+      <TextField
+        label="Age"
+        name="age"
+        variant="filled"
+        value={inpval.age}
+        onChange={setdata}
+      />
 
+      <TextField
+        label="Mobile"
+        name="mobile"
+        variant="filled"
+        value={inpval.mobile}
+        onChange={setdata}
+      />
 
+      <TextField
+        label="Work details"
+        name="work"
+        variant="filled"
+        value={inpval.work}
+        onChange={setdata}
+      />
 
-    const getdata = async () => {
+      <TextField
+        label="Address"
+        name="add"
+        variant="filled"
+        value={inpval.add}
+        onChange={setdata}
+      />
 
-        const res = await fetch(`https://crud-backend-fct5.onrender.com/getuser/${id}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
+      <TextField
+        multiline
+        rows={4}
+        label="Description"
+        name="desc"
+        variant="filled"
+        value={inpval.desc}
+        onChange={setdata}
+      />
 
-        const data = await res.json();
-        console.log(data);
-
-        if (res.status === 422 || !data) {
-            console.log("error ");
-
-        } else {
-            setINP(data)
-            console.log("get data");
-
-        }
-    }
-
-    useEffect(() => {
-        getdata();
-    }, []);
-
-
-    const updateuser = async(e)=>{
-        e.preventDefault();
-
-        const {name,email,work,add,mobile,desc,age} = inpval;
-
-        const res2 = await fetch(`https://crud-backend-fct5.onrender.com/updateuser/${id}`,{
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body:JSON.stringify({
-                name,email,work,add,mobile,desc,age
-            })
-        });
-
-        const data2 = await res2.json();
-        console.log(data2);
-
-        if(res2.status === 422 || !data2){
-            alert("fill the data");
-        }else{
-            history("/")
-            setUPdata(data2);
-        }
-
-    }
-
-    return (
-        <div className="container">
-            <NavLink to="/">home2</NavLink>
-            <form className="mt-4">
-                <div className="row">
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputEmail1" class="form-label">Name</label>
-                        <input type="text" value={inpval.name} onChange={setdata} name="name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">email</label>
-                        <input type="email" value={inpval.email} onChange={setdata} name="email" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">age</label>
-                        <input type="text" value={inpval.age} onChange={setdata} name="age" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Mobile</label>
-                        <input type="number" value={inpval.mobile} onChange={setdata} name="mobile" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Work</label>
-                        <input type="text" value={inpval.work} onChange={setdata} name="work" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-6 col-md-6 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Address</label>
-                        <input type="text" value={inpval.add} onChange={setdata} name="add" class="form-control" id="exampleInputPassword1" />
-                    </div>
-                    <div class="mb-3 col-lg-12 col-md-12 col-12">
-                        <label for="exampleInputPassword1" class="form-label">Description</label>
-                        <textarea name="desc" value={inpval.desc} onChange={setdata} className="form-control" id="" cols="30" rows="5"></textarea>
-                    </div>
-
-                    <button type="submit" onClick={updateuser} class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
-    )
-}
+      <Button
+        onClick={updateuser}
+        type="submit"
+        variant="contained"
+        color="success"
+      >
+        Upadte
+      </Button>
+    </form>
+  );
+};
 
 export default Edit;
-
-
-
-
-

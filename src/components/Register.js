@@ -1,6 +1,6 @@
-import React, { useContext, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Formik, useFormik } from "formik";
+import React, { useContext } from "react";
+import {  useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
 import * as yup from "yup";
 import { adddata } from "./context/ContextProvider";
 
@@ -169,9 +169,9 @@ const Register = () => {
         error={touched.desc && errors.desc ? true : false}
       />
 
-      <button type="submit" variant="filled">
+      <Button type="submit" variant="contained" color="success">
         Submit
-      </button>
+      </Button>
     </form>
   );
 };
